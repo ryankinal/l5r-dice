@@ -226,8 +226,10 @@
 
 	rollInput.addEventListener('change', makeMinZeroHandler(rollInput));
 	keepInput.addEventListener('change', makeMinZeroHandler(keepInput));
-	
+
+	rollInput.addEventListener('change', makeMaxRollHandler(keepInput));
 	keepInput.addEventListener('change', makeMaxRollHandler(keepInput));
+
 
 	rollButton.addEventListener('click', roll);
 })();

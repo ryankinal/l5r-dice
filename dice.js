@@ -223,5 +223,5 @@
 	keepInput.addEventListener('change', makeMinZeroHandler(rollInput));
 
 	rollButton.addEventListener('click', roll);
-	rollButton.addEventListener('touchstart', roll);
+	// rollButton.addEventListener('touchstart', roll);
 })();

@@ -19,8 +19,6 @@
 		} else {
 			return val;
 		}
-
-		return (val === 10) ? val + d10() : val;
 	}
 
 	function checkReroll(val) {

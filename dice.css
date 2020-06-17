@@ -1,0 +1,158 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Roboto', sans-serif;
+	font-size: 18px;
+	margin: 10px;
+	background-color: #38332F;
+	color: #EEEBD8;
+}
+
+h1 {
+	text-align: center;
+}
+
+.restrict {
+	max-width: 400px;
+	margin: 0 auto;
+}
+
+.dice {
+	font-size: 45px;
+	text-align: center;
+}
+
+.dice * {
+	display: inline-block;
+}
+
+.dice input {
+	font-size: 45px;
+	width: 80px;
+	text-align: center;
+	border: solid #DDD 1px;
+}
+
+.dice span {
+	margin: 4px;
+	vertical-align: top;
+}
+
+.options {
+	text-align: center;
+}
+
+#doIt {
+	width: 100%;
+	background-color: #F4D244;
+	border: none;
+	font-size: 18px;
+	outline: 0;
+	padding: 10px 20px;
+}
+
+.total,
+.actual-rolled {
+	text-align: center;
+}
+
+.total {
+	margin-bottom: 10px;
+}
+
+#output, .options, .detail {
+	padding: 15px 0;
+}
+
+.output-section {
+	display: inline-block;
+	width: 80px;
+	border: solid #F4D244 1px;
+	background-color: #EEEBD8;
+	color: #000;
+}
+
+.output-section-plus,
+.output-section-equals {
+	width: auto;
+	border: none;
+	background-color: transparent;
+	position: relative;
+	color: #EEEBD8;
+	top: -10px;
+}
+
+.output-header {
+	border-bottom: solid #F4D244 1px;
+	padding: 5px;
+}
+
+.output-section .output-value {
+	padding: 10px;
+	font-size: 45px;
+}
+
+.output-die {
+	width: 30px;
+	height: 30px;
+	color: #FFF;
+	margin: 10px;
+	position: relative;
+	display: inline-block;
+	text-align: center;
+	vertical-align: center;
+}
+
+.output-die-value {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.output-die::before {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	content: '';
+	display: block;
+	transform: rotate(51deg) skew(15deg);
+	background-color: #F00;
+	border-radius: 2px;
+}
+
+.output {
+	padding: 10px 15px;
+	margin-bottom: 5px;
+	vertical-align: middle;
+	position: relative;
+	background-color: rgba(255, 255, 255, 0.2);
+}
+
+.output-text {
+	position: relative;
+	top: -18px;
+}
+
+.output.unkept {
+	opacity: 0.4;
+}
+
+.output-tags,
+.output-total-die-value {
+	font-size: .6em;
+	position: absolute;
+	right: 6px;
+}
+
+.output-tags {
+	top: 6px;
+}
+
+.output-total-die-value {
+	bottom: 6px;
+}

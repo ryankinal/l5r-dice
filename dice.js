@@ -73,7 +73,7 @@
 			spread = [],
 			rerolled = [],
 			keep = [],
-			rolled = 0;
+			rolled = 0,
 			total = 0,
 			totalString = '',
 			bonusString;
@@ -186,7 +186,7 @@
 		}).join('');
 	}
 
-	function minZeroHandler(input) {
+	function makeMinZeroHandler(input) {
 		return function() {
 			if (pareseInt(input.value) < 0) {
 				input.value = 0;
@@ -223,5 +223,4 @@
 	keepInput.addEventListener('change', makeMinZeroHandler(rollInput));
 
 	rollButton.addEventListener('click', roll);
-	rollButton.addEventListener('touchstart', roll);
 })();

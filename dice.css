@@ -29,8 +29,8 @@ h1 {
 }
 
 .dice input {
-	font-size: 45px;
-	width: 80px;
+	font-size: 40px;
+	width: 60px;
 	text-align: center;
 	border: solid #DDD 1px;
 }
@@ -92,6 +92,7 @@ h1 {
 .output-section .output-value {
 	padding: 10px;
 	font-size: 45px;
+	background-color: rgba(0, 0, 0, 0.1);
 }
 
 .output-die {
@@ -155,4 +156,11 @@ h1 {
 
 .output-total-die-value {
 	bottom: 6px;
+}
+
+@media (min-width: 400px) {
+	.dice input {
+		width: 80px;
+		font-size: 45px;
+	}
 }

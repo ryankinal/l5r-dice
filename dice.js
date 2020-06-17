@@ -75,7 +75,8 @@
 			keep = [],
 			rolled = 0;
 			total = 0,
-			totalString = '';
+			totalString = '',
+			bonusString;
 
 		// Can't roll more than 10 dice in l54 4E
 		// Every 2 on top of that is +1 kept die
@@ -130,6 +131,11 @@
 
 		// If there is a bonus, we add the roll and the bonus to the interface
 		if (bonus) {
+			if (bonus > 0) {
+				bonusString = 'Bonus';
+			} else {
+				bonusString = 'Penalty';
+			}
 			totalString = `<div class="output-section output-section-rolled">
 					<div class="output-header">Rolled</div>
 					<div class="output-value output-rolled">${rolled}</div>
@@ -138,7 +144,7 @@
 					<div>+</div>
 				</div>
 				<div class="output-section output-section-bonus">
-					<div class="output-header">Bonus</div>
+					<div class="output-header">${bonusString}</div>
 					<div class="output-value output-bonus">${bonus}</div>
 				</div>
 				<div class="output-section output-section-equals">
@@ -180,6 +186,14 @@
 		}).join('');
 	}
 
+	function minZeroHandler(input) {
+		return function() {
+			if (pareseInt(input.value) < 0) {
+				input.value = 0;
+			}
+		}
+	}
+
 	function makeFocusHandler(input) {
 		return function() {
 			input.dataset.oldValue = input.value;
@@ -200,8 +214,13 @@
 	rollInput.addEventListener('focus', makeFocusHandler(rollInput));
 	keepInput.addEventListener('focus', makeFocusHandler(keepInput));
 	bonusInput.addEventListener('focus', makeFocusHandler(bonusInput));
+	
 	rollInput.addEventListener('blur', makeBlurHandler(rollInput));
 	keepInput.addEventListener('blur', makeBlurHandler(keepInput));
 	bonusInput.addEventListener('blur', makeBlurHandler(bonusInput));
+
+	rollInput.addEventListener('change', makeMinZeroHandler(rollInput));
+	keepInput.addEventListener('change', makeMinZeroHandler(rollInput));
+
 	rollButton.addEventListener('click', roll);
 })();

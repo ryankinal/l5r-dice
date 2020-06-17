@@ -3,12 +3,13 @@
 <head>
 	<title>L5R 4E Dice</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://kit.fontawesome.com/58e5c80e40.js" crossorigin="anonymous"></script>
 	<link href="https://fonts.googleapis.com/css?family=Ruslan+Display|Roboto&display=swap" rel="stylesheet">
 	<link href="dice.css" rel="stylesheet">
 </head>
 <body>
 	<div class="restrict">
-		<h1>L5R 4E Dice</h1>
+		<h1>L5R 4E Dice <button id="quickRollsButton"><span class="fas fa-file"></span> Saved Rolls</button></h1>
 		<div class="form">
 			<div class="dice">
 				<input type="number" id="roll" length="2" value="4">
@@ -23,6 +24,7 @@
 			</div>
 			<div class="submit">
 				<button id="doIt">Roll</button>
+				<button id="saveIt">Save</button>
 			</div>
 		</div>
 		<div class="results">
@@ -33,6 +35,35 @@
 			</div>
 		</div>
 	</div>
+	<div id="saveModal">
+		<div class="summary"></div>
+		<div>
+			<label>Name</label>
+			<input type="text" id="nameInput">
+		</div>
+		<div>
+			<label>Group</label>
+			<input type="text" id="groupInput">
+		</div>
+		<div>
+			<button id="confirmSave">Save</button>
+			<button id="cancelSave">Cancel</button>
+		</div>
+	</div>
+	<div id="quickRollsModal">
+		<div class="key">
+			<div>
+				<span class="fas fa-hand-holding button quick-roll-button"></span> = roll
+			</div>
+			<div>
+				<span class="fas fa-hand-holding-medical button void-roll-button"></span> = roll with void point
+			</div>
+		</div>
+		<div class="list">
+			
+		</div>
+	</div>
+	<div id="blanket"></div>
 	<script type="text/javascript" src="dice.js"></script>
 </body>
 </html>

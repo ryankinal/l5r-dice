@@ -1,5 +1,9 @@
 (function() {
-	var rollInput = document.getElementById('roll'),
+	var storedRolls = localStorage.getItem('quickRolls'),
+		quickRolls = (storedRolls) ? JSON.parse(storedRolls) : [],
+		groups = getGroups(quickRolls),
+		rollToSave,
+		rollInput = document.getElementById('roll'),
 		keepInput = document.getElementById('keep'),
 		bonusInput = document.getElementById('bonus'),
 		explodeInput = document.getElementById('explode'),
@@ -7,7 +11,73 @@
 		actualRolledOutput = document.querySelector('#output .actual-rolled'),
 		totalOutput = document.querySelector('#output .total'),
 		detailOutput = document.querySelector('#output .detail'),
-		rollButton = document.getElementById('doIt');
+		rollButton = document.getElementById('doIt'),
+
+		quickRollsButton = document.getElementById('quickRollsButton'),
+		quickRollsModal = document.getElementById('quickRollsModal'),
+		quickRollsList = quickRollsModal.querySelector('.list'),
+
+		saveButton = document.getElementById('saveIt'),
+		saveModal = document.getElementById('saveModal'),
+		confirmSaveButton = document.getElementById('confirmSave'),
+		cancelSaveButton = document.getElementById('cancelSave'),
+		nameInput = document.getElementById('nameInput'),
+		groupInput = document.getElementById('groupInput'),
+		blanket = document.getElementById('blanket');
+
+	function clearResults() {
+		actualRolledOutput.innerHTML = '';
+		totalOutput.innerHTML = '';
+		detailOutput.innerHTML = '';
+	}
+
+	function getGroups(rolls) {
+		var groups = [];
+
+		quickRolls.forEach(function(r) {
+			if (groups.indexOf(r.group) < 0) {
+				groups.push(r.group);
+			}
+		});
+
+		return groups.sort();
+	}
+
+	function getRollsInGroup(group) {
+		return quickRolls.filter(function(r) {
+			return r.group === group;
+		}).sort(function(a, b) {
+			return a.name.localeCompare(b.name);
+		});
+	}
+
+	function getRollObject() {
+		return {
+			roll: parseInt(rollInput.value),
+			keep: parseInt(keepInput.value),
+			bonus: parseInt(bonusInput.value),
+			explode: !!explodeInput.checked,
+			reroll: !!rerollInput.checked
+		};
+	}
+
+	function updateRollInterface(rollObject) {
+		clearResults();
+
+		rollInput.value = rollObject.roll;
+		keepInput.value = rollObject.keep;
+		bonusInput.value = rollObject.bonus;
+		explodeInput.checked = (rollObject.explode) ? 'checked' : false;
+		rerollInput.checked = (rollObject.reroll) ? 'checked' : false;
+
+		if (rollObject.name) {
+			nameInput.value = rollObject.name;
+		}
+
+		if (rollObject.group) {
+			groupInput.value = rollObject.group;
+		}
+	}
 
 	function d10() {
 		return Math.floor(Math.random() * 10) + 1;
@@ -61,12 +131,12 @@
 		return split;
 	}
 
-	function roll() {
-		var toRoll = parseInt(rollInput.value),
-			toKeep = parseInt(keepInput.value),
-			bonus = parseInt(bonusInput.value),
-			explode = !!explodeInput.checked,
-			reroll = !!rerollInput.checked,
+	function roll(config) {
+		var toRoll = config.roll,
+			toKeep = config.keep,
+			bonus = config.bonus,
+			explode = config.explode,
+			reroll = config.reroll,
 			spread = [],
 			rerolled = [],
 			keep = [],
@@ -183,6 +253,7 @@
 
 	function makeMinZeroHandler(input) {
 		return function() {
+			console.log('change');
 			if (parseInt(input.value) < 0) {
 				input.value = 0;
 			}
@@ -191,6 +262,7 @@
 
 	function makeMaxRollHandler(input) {
 		return function() {
+			console.log('change');
 			if (parseInt(input.value) > parseInt(rollInput.value)) {
 				input.value = rollInput.value;
 			}
@@ -214,6 +286,111 @@
 		}
 	}
 
+	function showQuickRolls() {
+		var groups = getGroups(quickRolls);
+
+		quickRollsList.innerHTML = '';
+
+		groups.forEach(function(group) {
+			var rolls = getRollsInGroup(group),
+				groupContainer = document.createElement('div'),
+				groupHeader = document.createElement('h2');
+
+			groupHeader.appendChild(document.createTextNode(group));
+			groupContainer.appendChild(groupHeader);
+
+			rolls.forEach(function(quickRoll) {
+				var container = document.createElement('div'),
+					buttonsContainer = document.createElement('div')
+					quickRollButton = document.createElement('span'),
+					voidRollButton = document.createElement('span'),
+					deleteButton = document.createElement('span');
+
+				container.className = 'quick-roll';
+				quickRollButton.className = 'fas fa-hand-holding button quick-roll-button';
+				voidRollButton.className = 'fas fa-hand-holding-medical button void-roll-button';
+				deleteButton.className = 'fas fa-trash delete-button';
+
+				buttonsContainer.appendChild(quickRollButton);
+				buttonsContainer.appendChild(voidRollButton);
+				buttonsContainer.className = 'quick-roll-buttons';
+
+				container.appendChild(buttonsContainer);
+				container.appendChild(document.createTextNode(quickRoll.name));
+				container.appendChild(deleteButton);
+
+				groupContainer.appendChild(container);
+
+				quickRollButton.addEventListener('click', function() {
+					blanket.style.display = 'none';
+					quickRollsModal.style.display = 'none';
+
+					updateRollInterface(quickRoll);
+				});
+
+				voidRollButton.addEventListener('click', function() {
+					var voidRoll = Object.assign({}, quickRoll);
+					voidRoll.roll += 1;
+					voidRoll.keep += 1;
+					blanket.style.display = 'none';
+					quickRollsModal.style.display = 'none';
+
+					updateRollInterface(voidRoll);
+				});
+
+				deleteButton.addEventListener('click', function() {
+					quickRolls = quickRolls.filter(function(filterRoll) {
+						return filterRoll.name !== quickRoll.name || filterRoll.group !== quickRoll.group;
+					});
+
+					localStorage.setItem('quickRolls', JSON.stringify(quickRolls));
+
+					blanket.style.display = 'none';
+					quickRollsModal.style.display = 'none';
+
+					if (quickRolls.length === 0) {
+						quickRollsButton.style.display = 'none';
+					}
+				});
+			});
+
+			quickRollsList.appendChild(groupContainer);
+		});
+
+		blanket.style.display = 'block';
+		quickRollsModal.style.display = 'block';
+	}
+
+	function showSaveModal() {
+		var rollString = rollToSave.roll + 'k' + rollToSave.keep + '+' + rollToSave.bonus,
+			bonusStrings = [];
+
+		if (rollToSave.explode) {
+			bonusStrings.push('Explode 10s');
+		} else {
+			bonusStrings.push('Do not explode 10s');
+		}
+
+		if (rollToSave.reroll) {
+			bonusStrings.push('Reroll 1s')
+		} else {
+			bonusStrings.push('Do not reroll 1s');
+		}
+
+		saveModal.querySelector('.summary').innerHTML = `<div>Roll: ${rollString}</div><div>${bonusStrings.join(', ')}</div>`;
+
+		if (rollToSave.name) {
+			nameInput.value = rollToSave.name;
+		}
+
+		if (rollToSave.group) {
+			groupInput.value = rollToSave.group;
+		}
+
+		saveModal.style.display = 'block';
+		blanket.style.display = 'block';
+	}
+
 	rollInput.addEventListener('focus', makeFocusHandler(rollInput));
 	keepInput.addEventListener('focus', makeFocusHandler(keepInput));
 	bonusInput.addEventListener('focus', makeFocusHandler(bonusInput));
@@ -228,6 +405,76 @@
 	rollInput.addEventListener('change', makeMaxRollHandler(keepInput));
 	keepInput.addEventListener('change', makeMaxRollHandler(keepInput));
 
+	rollButton.addEventListener('click', function() {
+		roll(getRollObject());
+	});
 
-	rollButton.addEventListener('click', roll);
+	saveButton.addEventListener('click', function() {
+		rollToSave = getRollObject();
+		showSaveModal();
+	});
+
+	confirmSaveButton.addEventListener('click', function() {
+		var doSave = true;
+
+		if (rollToSave) {
+			if (nameInput.value && groupInput.value) {
+				var updated = false;
+
+				nameInput.classList.remove('error');
+				groupInput.classList.remove('error');
+
+				rollToSave.name = nameInput.value;
+				rollToSave.group = groupInput.value;
+
+				quickRolls = quickRolls.map(function(quickRoll) {
+					if (quickRoll.name === rollToSave.name && quickRoll.group === rollToSave.group) {
+						updated = true;
+						return rollToSave;
+					} else {
+						return quickRoll;
+					}
+				});
+
+				if (!updated) {
+					quickRolls.push(rollToSave);
+				}
+
+				rollToSave = null;
+				saveModal.style.display = 'none';
+				blanket.style.display = 'none';
+				quickRollsButton.style.display = 'block';
+
+				localStorage.setItem('quickRolls', JSON.stringify(quickRolls));
+			} else {
+				 if (!nameInput.value) {
+				 	nameInput.classList.add('error');
+				 }
+
+				 if (!groupInput.value) {
+				 	groupInput.classList.add('error');
+				 }
+			}
+		}
+	});
+
+	cancelSaveButton.addEventListener('click', function() {
+		rollToSave = null;
+		saveModal.style.display = 'none';
+		blanket.style.display = 'none';
+	});
+
+	blanket.addEventListener('click', function() {
+		saveModal.style.display = 'none';
+		blanket.style.display = 'none';
+		quickRollsModal.style.display = 'none';
+	});
+
+	quickRollsButton.addEventListener('click', showQuickRolls);
+
+	if (quickRolls.length) {
+		quickRollsButton.style.display = 'block';
+	} else {
+		quickRollsButton.style.display = 'none';
+	}
 })();

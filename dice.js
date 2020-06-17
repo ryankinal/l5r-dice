@@ -66,7 +66,6 @@
 	function roll() {
 		var toRoll = parseInt(rollInput.value),
 			toKeep = parseInt(keepInput.value),
-			rollModified = false,
 			bonus = parseInt(bonusInput.value),
 			explode = !!explodeInput.checked,
 			reroll = !!rerollInput.checked,
@@ -83,7 +82,6 @@
 		if (toRoll > 10) {
 			toKeep += Math.floor((toRoll - 10) / 2);
 			toRoll = 10;
-			rollModified = true;
 		}
 
 		// Create an array with the right number of items,
@@ -119,9 +117,7 @@
 		rolled = keep.reduce(sum, 0);
 		total = rolled + bonus;
 
-		if (rollModified) {
-			actualRolledOutput.innerHTML = `Rolled <span class="actual-rolled">${toRoll}</span>, kept <span class="actual-kept">${toKeep}</span>`;
-		}
+		actualRolledOutput.innerHTML = `Rolled <span class="actual-rolled">${toRoll}</span>, kept <span class="actual-kept">${toKeep}</span>`;
 
 		// Make the roll output. If there are no bonuses, it's just the total
 		totalString = `<div class="output-section output-section-total">
@@ -136,6 +132,7 @@
 			} else {
 				bonusString = 'Penalty';
 			}
+
 			totalString = `<div class="output-section output-section-rolled">
 					<div class="output-header">Rolled</div>
 					<div class="output-value output-rolled">${rolled}</div>
@@ -188,17 +185,25 @@
 
 	function makeMinZeroHandler(input) {
 		return function() {
-			if (pareseInt(input.value) < 0) {
+			if (parseInt(input.value) < 0) {
 				input.value = 0;
 			}
-		}
+		};
+	}
+
+	function makeMaxRollHandler(input) {
+		return function() {
+			if (parseInt(input.value) > parseInt(rollInput.value)) {
+				input.value = rollInput.value;
+			}
+		};
 	}
 
 	function makeFocusHandler(input) {
 		return function() {
 			input.dataset.oldValue = input.value;
 			input.value = '';
-		}
+		};
 	}
 
 	function makeBlurHandler(input) {
@@ -220,8 +225,9 @@
 	bonusInput.addEventListener('blur', makeBlurHandler(bonusInput));
 
 	rollInput.addEventListener('change', makeMinZeroHandler(rollInput));
-	keepInput.addEventListener('change', makeMinZeroHandler(rollInput));
+	keepInput.addEventListener('change', makeMinZeroHandler(keepInput));
+	
+	keepInput.addEventListener('change', makeMaxRollHandler(keepInput));
 
 	rollButton.addEventListener('click', roll);
-	// rollButton.addEventListener('touchstart', roll);
 })();

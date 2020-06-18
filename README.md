@@ -13,7 +13,7 @@ The total of your skill + trait, trait roll, etc. By the rules, if this totals m
 
 The number of dice to "keep". The roller will keep the highest dice rolled after rerolles and explosions and sum the result to get the total of your dice rolled.
 
-### Penalties (last input)
+### Bonuses/Penalties (last input)
 
 Negative numbers are allowed in the last input, and will be applied as a penalty.
 

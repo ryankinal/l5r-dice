@@ -74,7 +74,8 @@ h1 {
 }
 
 .total,
-.actual-rolled {
+.actual-rolled,
+#rolling {
 	text-align: center;
 }
 

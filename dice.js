@@ -8,10 +8,12 @@
 		bonusInput = document.getElementById('bonus'),
 		explodeInput = document.getElementById('explode'),
 		rerollInput = document.getElementById('reroll'),
+		outputContainer = document.getElementById('output'),
 		actualRolledOutput = document.querySelector('#output .actual-rolled'),
 		totalOutput = document.querySelector('#output .total'),
 		detailOutput = document.querySelector('#output .detail'),
 		rollButton = document.getElementById('doIt'),
+		rollingSpinner = document.getElementById('rolling'),
 
 		quickRollsButton = document.getElementById('quickRollsButton'),
 		quickRollsModal = document.getElementById('quickRollsModal'),
@@ -132,123 +134,131 @@
 	}
 
 	function roll(config) {
-		var toRoll = config.roll,
-			toKeep = config.keep,
-			bonus = config.bonus,
-			explode = config.explode,
-			reroll = config.reroll,
-			spread = [],
-			rerolled = [],
-			keep = [],
-			rolled = 0,
-			total = 0,
-			totalString = '',
-			bonusString;
+		outputContainer.style.display = 'none';
+		rollingSpinner.style.display = 'block';
 
-		// Can't roll more than 10 dice in l54 4E
-		// Every 2 on top of that is +1 kept die
-		if (toRoll > 10) {
-			toKeep += Math.floor((toRoll - 10) / 2);
-			toRoll = 10;
-		}
+		setTimeout(function() {
+			var toRoll = config.roll,
+				toKeep = config.keep,
+				bonus = config.bonus,
+				explode = config.explode,
+				reroll = config.reroll,
+				spread = [],
+				rerolled = [],
+				keep = [],
+				rolled = 0,
+				total = 0,
+				totalString = '',
+				bonusString;
 
-		// Create an array with the right number of items,
-		// fill it with anything so map works, and then
-		// roll a d10 for each item
-		spread = (new Array(toRoll)).fill(0).map(d10);
-
-		// If we're rerolling 1's for emphases, do that
-		// first. We track which initial rolls were 1's
-		// so we can display that in the interface
-		if (reroll) {
-			rerolled = spread.map(checkReroll);
-			spread = spread.map(doReroll);
-		}
-
-		// If' we're exploding 10's, run doExplode
-		// on each value. This continues to reroll until
-		// a non-10 is rolled. Theoretically, this could
-		// go infinite in very rare circumstances.
-		if (explode) {
-			spread = spread.map(doExplode);
-		}
-
-		// Sort the array numerically. JS sorts alphabetically
-		// by default even when the array is all numemric. Oh well.
-		spread = spread.sort(function(a, b) {
-			return b - a;
-		});
-
-		// Get the kept dice, the total rolled on those dice
-		// and the total after bonuses
-		keep = spread.slice(0, toKeep);
-		rolled = keep.reduce(sum, 0);
-		total = rolled + bonus;
-
-		actualRolledOutput.innerHTML = `Rolled <span class="actual-rolled">${toRoll}</span>, kept <span class="actual-kept">${toKeep}</span>`;
-
-		// Make the roll output. If there are no bonuses, it's just the total
-		totalString = `<div class="output-section output-section-total">
-				<div class="output-header">Total</div>
-				<div class="output-value output-total">${total}</div>
-			</div>`;
-
-		// If there is a bonus, we add the roll and the bonus to the interface
-		if (bonus) {
-			if (bonus > 0) {
-				bonusString = 'Bonus';
-			} else {
-				bonusString = 'Penalty';
+			// Can't roll more than 10 dice in l54 4E
+			// Every 2 on top of that is +1 kept die
+			if (toRoll > 10) {
+				toKeep += Math.floor((toRoll - 10) / 2);
+				toRoll = 10;
 			}
 
-			totalString = `<div class="output-section output-section-rolled">
-					<div class="output-header">Rolled</div>
-					<div class="output-value output-rolled">${rolled}</div>
-				</div>
-				<div class="output-section output-section-plus">
-					<div>+</div>
-				</div>
-				<div class="output-section output-section-bonus">
-					<div class="output-header">${bonusString}</div>
-					<div class="output-value output-bonus">${bonus}</div>
-				</div>
-				<div class="output-section output-section-equals">
-					<div>=</div>
-				</div>
-				` + totalString;
+			// Create an array with the right number of items,
+			// fill it with anything so map works, and then
+			// roll a d10 for each item
+			spread = (new Array(toRoll)).fill(0).map(d10);
 
-			totalOutput.classList.add('bonus');
-		} else {
-			totalOutput.classList.remove('bonus');
-		}
-
-		totalOutput.innerHTML = totalString;
-
-		// Make the per-die output
-		detailOutput.innerHTML = spread.map(function(val, index) {
-			var keepClass = (index < toKeep) ? 'kept' : 'unkept',
-				rerollClass = (rerolled[index]) ? 'rerolled' : '',
-				tags = [];
-
-			if (val >= 10) {
-				tags.push('exploded');
+			// If we're rerolling 1's for emphases, do that
+			// first. We track which initial rolls were 1's
+			// so we can display that in the interface
+			if (reroll) {
+				rerolled = spread.map(checkReroll);
+				spread = spread.map(doReroll);
 			}
 
-			if (rerolled[index]) {
-				tags.push('rerolled');
+			// If' we're exploding 10's, run doExplode
+			// on each value. This continues to reroll until
+			// a non-10 is rolled. Theoretically, this could
+			// go infinite in very rare circumstances.
+			if (explode) {
+				spread = spread.map(doExplode);
 			}
 
-			if (index < toKeep) {
-				tags.push('kept');
-			} else {
-				tags.push('unkept');
-			}
+			// Sort the array numerically. JS sorts alphabetically
+			// by default even when the array is all numemric. Oh well.
+			spread = spread.sort(function(a, b) {
+				return b - a;
+			});
 
-			return `<div class="output ${keepClass} ${rerollClass}">
-					${makeDie(val)}
-					<div class="output-tags">${tags.join(', ')}</div>
+			// Get the kept dice, the total rolled on those dice
+			// and the total after bonuses
+			keep = spread.slice(0, toKeep);
+			rolled = keep.reduce(sum, 0);
+			total = rolled + bonus;
+
+			actualRolledOutput.innerHTML = `Rolled <span class="actual-rolled">${toRoll}</span>, kept <span class="actual-kept">${toKeep}</span>`;
+
+			// Make the roll output. If there are no bonuses, it's just the total
+			totalString = `<div class="output-section output-section-total">
+					<div class="output-header">Total</div>
+					<div class="output-value output-total">${total}</div>
 				</div>`;
-		}).join('');
+
+			// If there is a bonus, we add the roll and the bonus to the interface
+			if (bonus) {
+				if (bonus > 0) {
+					bonusString = 'Bonus';
+				} else {
+					bonusString = 'Penalty';
+				}
+
+				totalString = `<div class="output-section output-section-rolled">
+						<div class="output-header">Rolled</div>
+						<div class="output-value output-rolled">${rolled}</div>
+					</div>
+					<div class="output-section output-section-plus">
+						<div>+</div>
+					</div>
+					<div class="output-section output-section-bonus">
+						<div class="output-header">${bonusString}</div>
+						<div class="output-value output-bonus">${bonus}</div>
+					</div>
+					<div class="output-section output-section-equals">
+						<div>=</div>
+					</div>
+					` + totalString;
+
+				totalOutput.classList.add('bonus');
+			} else {
+				totalOutput.classList.remove('bonus');
+			}
+
+			totalOutput.innerHTML = totalString;
+
+			// Make the per-die output
+			detailOutput.innerHTML = spread.map(function(val, index) {
+				var keepClass = (index < toKeep) ? 'kept' : 'unkept',
+					rerollClass = (rerolled[index]) ? 'rerolled' : '',
+					tags = [];
+
+				if (val >= 10) {
+					tags.push('exploded');
+				}
+
+				if (rerolled[index]) {
+					tags.push('rerolled');
+				}
+
+				if (index < toKeep) {
+					tags.push('kept');
+				} else {
+					tags.push('unkept');
+				}
+
+				return `<div class="output ${keepClass} ${rerollClass}">
+						${makeDie(val)}
+						<div class="output-tags">${tags.join(', ')}</div>
+					</div>`;
+			}).join('');
+
+			rollingSpinner.style.display = 'none';
+			outputContainer.style.display = 'block';
+		}, 300);
 	}
 
 	function makeMinZeroHandler(input) {

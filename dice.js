@@ -227,7 +227,13 @@
 	}
 	
 	function getRollString(rollObject) {
-		return `${rollObject.roll}k${rollObject.keep}+${rollObject.bonus}`;
+		var str = `${rollObject.roll}k${rollObject.keep}`;
+
+		if (rollObject.bonus) {
+			str += `+${rollObject.bonus}`;
+		}
+
+		return str;
 	}
 
 	function updateRollInterface(rollObject) {

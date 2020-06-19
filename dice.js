@@ -44,7 +44,6 @@
 			'Etiquette',
 			'Games',
 			'Investigation',
-			'Lore:',
 			'Lore: Anatomy',
 			'Lore: Architecture',
 			'Lore: Bushido',
@@ -63,7 +62,6 @@
 			'Lore: War',
 			'Medicine',
 			'Meditation',
-			'Perform:',
 			'Perform: Biwa',
 			'Perform: Dance',
 			'Perform: Drums',
@@ -95,7 +93,6 @@
 			'War Fan',
 			'Animal Handling',
 			'Commerce',
-			'Craft:',
 			'Craft: Armorsmithing',
 			'Craft: Blacksmithing',
 			'Craft: Bowyer',
@@ -164,7 +161,7 @@
 				});
 
 				return span;
-			}).slice(0, 5).forEach(function(el) {
+			}).slice(0, 15).forEach(function(el) {
 				nameSuggestionsOutput.appendChild(el);
 			});	
 
@@ -193,7 +190,7 @@
 				});
 
 				return span;
-			}).slice(0, 5).forEach(function(el) {
+			}).slice(0, 15).forEach(function(el) {
 				groupSuggestionsOutput.appendChild(el);
 			});
 
@@ -253,6 +250,7 @@
 				rollNameOutput.innerHTML = rollObject.name;
 			} else {
 				rollNameOutput.innerHTML = '';
+				nameInput.value = '';
 			}
 
 			if (rollObject.group) {
@@ -260,6 +258,7 @@
 				rollGroupOutput.innerHTML = rollObject.group;
 			} else {
 				rollGroupOutput.innerHTML = '';
+				groupInput.value = '';
 			}
 
 			rollIdContainer.style.display = 'block'
@@ -269,6 +268,8 @@
 			rollNameOutput.innerHTML = '';
 			rollGroupOutput.innerHTML = '';
 			clearRollContainer.style.display = 'none';
+			nameInput.value = '';
+			groupInput.value = '';
 		}
 	}
 
@@ -707,6 +708,7 @@
 	});
 
 	groupInput.addEventListener('keyup', function(e) {
+		groupInput.classList.remove('error');
 		getGroupSuggestions(groupInput.value);
 		updateSaveInterface();
 	});
@@ -716,6 +718,7 @@
 	});
 
 	nameInput.addEventListener('keyup', function(e) {
+		nameInput.classList.remove('error');
 		getNameSuggestions(nameInput.value);
 		updateSaveInterface();
 	});

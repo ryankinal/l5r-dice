@@ -54,6 +54,10 @@ h1 {
 	text-align: center;
 }
 
+.error {
+	border: solid #DE0808 2px;
+}
+
 #doIt,
 #saveIt,
 #confirmSave,

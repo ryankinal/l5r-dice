@@ -28,8 +28,98 @@
 		confirmSaveButton = document.getElementById('confirmSave'),
 		cancelSaveButton = document.getElementById('cancelSave'),
 		nameInput = document.getElementById('nameInput'),
+		nameSuggestionsOutput = document.getElementById('nameSuggestions'),
 		groupInput = document.getElementById('groupInput'),
-		blanket = document.getElementById('blanket');
+		groupSuggestionsOutput = document.getElementById('groupSuggestions'),
+		blanket = document.getElementById('blanket'),
+
+		skills = [
+			'Acting',
+			'Artisan',
+			'Calligraphy',
+			'Courtier',
+			'Divination',
+			'Etiquette',
+			'Games',
+			'Investigation',
+			'Lore:',
+			'Lore: Anatomy',
+			'Lore: Architecture',
+			'Lore: Bushido',
+			'Lore: Elements',
+			'Lore: Ghosts',
+			'Lore: Heraldry',
+			'Lore: History',
+			'Lore: Maho',
+			'Lore: Nature',
+			'Lore: Omens',
+			'Lore: Shadowlands',
+			'Lore: Shugenja',
+			'Lore: Spirit Realms',
+			'Lore: Theology',
+			'Lore: Underworld',
+			'Lore: War',
+			'Medicine',
+			'Meditation',
+			'Perform:',
+			'Perform: Biwa',
+			'Perform: Dance',
+			'Perform: Drums',
+			'Perform: Flute',
+			'Perform: Oratory',
+			'Perform: Puppeteer',
+			'Perform: Samisen',
+			'Perform: Song',
+			'Perform: Storytelling',
+			'Sinceriy',
+			'Spellcraft',
+			'Tea Ceremony',
+			'Athletics',
+			'Battle',
+			'Defense',
+			'Horsemanship',
+			'Hunting',
+			'Iaijutsu',
+			'Jiujutsu',
+			'Chain Weapons',
+			'Heavy Weapons',
+			'Kenjutsu',
+			'Knives',
+			'Kyujutsu',
+			'Ninjutsu',
+			'Polearms',
+			'Spears',
+			'Staves',
+			'War Fan',
+			'Animal Handling',
+			'Commerce',
+			'Craft:',
+			'Craft: Armorsmithing',
+			'Craft: Blacksmithing',
+			'Craft: Bowyer',
+			'Craft: Brewing',
+			'Craft: Carpentry',
+			'Craft: Cartography',
+			'Craft: Cobbling',
+			'Craft: Cooking',
+			'Craft: Farming',
+			'Craft: Fishing',
+			'Craft: Masonry',
+			'Craft: Mining',
+			'Craft: Poison',
+			'Craft: Pottery',
+			'Craft: Shipbuilding',
+			'Craft: Tailoring',
+			'Craft: Weaponsmithing',
+			'Craft: Weaving',
+			'Engineering',
+			'Sailing',
+			'Forgery',
+			'Intimidation',
+			'Sleight of Hand',
+			'Stealth',
+			'Temptation'
+		];
 
 	function clearResults() {
 		actualRolledOutput.innerHTML = '';
@@ -40,13 +130,76 @@
 	function getGroups(rolls) {
 		var groups = [];
 
-		quickRolls.forEach(function(r) {
+		(rolls || quickRolls).forEach(function(r) {
 			if (groups.indexOf(r.group) < 0) {
 				groups.push(r.group);
 			}
 		});
 
 		return groups.sort();
+	}
+
+	function getNameSuggestions(start) {
+		nameSuggestionsOutput.innerHTML = '';
+
+		var filtered = quickRolls.map(function(r) {
+				return r.name;
+			}).concat(skills).sort(function(a, b) {
+				return a.localeCompare(b);
+			}).filter(function(n) {
+				return n.toLowerCase().indexOf(start.toLowerCase()) === 0;
+			});
+
+		if (filtered.length) {
+			filtered.map(function(n) {
+				var span = document.createElement('span');
+				span.className = 'suggestion';
+				span.appendChild(document.createTextNode(n));
+
+				span.addEventListener('click', function() {
+					nameInput.value = n;
+					nameSuggestionsOutput.style.display = 'none';
+				});
+
+				return span;
+			}).slice(0, 5).forEach(function(el) {
+				nameSuggestionsOutput.appendChild(el);
+			});	
+
+			nameSuggestionsOutput.style.display = 'block';
+		} else {
+			nameSuggestionsOutput.style.display = 'none';
+		}
+	}
+
+	function getGroupSuggestions(start) {
+		var filtered = getGroups().filter(function(g) {
+				return g.toLowerCase().indexOf(start.toLowerCase()) === 0;
+			});
+
+		groupSuggestionsOutput.innerHTML = '';
+
+		if (filtered.length) {
+			filtered.map(function(n) {
+				var span = document.createElement('span');
+				span.className = 'suggestion';
+				span.appendChild(document.createTextNode(n));
+
+				span.addEventListener('click', function() {
+					groupInput.value = n;
+					groupSuggestionsOutput.style.display = 'none';
+				});
+
+				return span;
+			}).slice(0, 5).forEach(function(el) {
+				groupSuggestionsOutput.appendChild(el);
+			});
+
+			groupSuggestionsOutput.style.display = 'block';
+		} else {
+			groupSuggestionsOutput.style.display = 'none';
+		}
+		
 	}
 
 	function getRollsInGroup(group) {
@@ -71,6 +224,10 @@
 
 	function storeLastRoll(rollObject) {
 		localStorage.setItem('lastRoll', JSON.stringify(rollObject));
+	}
+	
+	function getRollString(rollObject) {
+		return `${rollObject.roll}k${rollObject.keep}+${rollObject.bonus}`;
 	}
 
 	function updateRollInterface(rollObject) {
@@ -155,6 +312,18 @@
 		split.push(val);
 
 		return split;
+	}
+
+	function updateSaveInterface() {
+		var found = quickRolls.filter(function(quickRoll) {
+				return quickRoll.name === nameInput.value && quickRoll.group === groupInput.value;
+			});
+
+		if (found && found.length) {
+			confirmSaveButton.innerHTML = 'Update';
+		} else {
+			confirmSaveButton.innerHTML = 'Save';
+		}
 	}
 
 	function roll(config) {
@@ -337,23 +506,27 @@
 
 			rolls.forEach(function(quickRoll) {
 				var container = document.createElement('div'),
+					nameContainer = document.createElement('div'),
 					buttonsContainer = document.createElement('div')
 					quickRollButton = document.createElement('span'),
 					voidRollButton = document.createElement('span'),
 					deleteButton = document.createElement('span');
 
 				container.className = 'quick-roll';
+				nameContainer.className = 'quick-roll-name';
 				quickRollButton.className = 'fas fa-hand-holding button quick-roll-button';
 				voidRollButton.className = 'fas fa-hand-holding-medical button void-roll-button';
-				deleteButton.className = 'fas fa-trash delete-button';
+				deleteButton.className = 'fas fa-trash quick-roll-delete delete-button';
 
 				buttonsContainer.appendChild(quickRollButton);
 				buttonsContainer.appendChild(voidRollButton);
+				buttonsContainer.appendChild(deleteButton);
 				buttonsContainer.className = 'quick-roll-buttons';
 
+				nameContainer.innerHTML = `${quickRoll.name}<br /><span class="quick-roll-dice">${getRollString(quickRoll)}</span>`;
+
 				container.appendChild(buttonsContainer);
-				container.appendChild(document.createTextNode(quickRoll.name));
-				container.appendChild(deleteButton);
+				container.appendChild(nameContainer);
 
 				groupContainer.appendChild(container);
 
@@ -409,7 +582,7 @@
 	}
 
 	function showSaveModal() {
-		var rollString = rollToSave.roll + 'k' + rollToSave.keep + '+' + rollToSave.bonus,
+		var rollString = getRollString(rollToSave),
 			bonusStrings = [];
 
 		if (rollToSave.explode) {
@@ -433,6 +606,11 @@
 		if (rollToSave.group) {
 			groupInput.value = rollToSave.group;
 		}
+
+		nameSuggestionsOutput.style.display = 'none';
+		groupSuggestionsOutput.style.display = 'none';
+
+		updateSaveInterface();
 
 		saveModal.style.display = 'block';
 		blanket.style.display = 'block';
@@ -512,6 +690,34 @@
 		rollToSave = null;
 		saveModal.style.display = 'none';
 		blanket.style.display = 'none';
+	});
+
+	groupInput.addEventListener('focus', function(e) {
+		groupInput.setSelectionRange(0, groupInput.value.length);
+	});
+
+	groupInput.addEventListener('keyup', function(e) {
+		var suggestion,
+			length = groupInput.value.length;
+
+		if (length > 0) {
+			getGroupSuggestions(groupInput.value);
+		}
+	});
+
+	nameInput.addEventListener('focus', function(e) {
+		nameInput.setSelectionRange(0, nameInput.value.length);
+	});
+
+	nameInput.addEventListener('keyup', function(e) {
+		var suggestion,
+			length = nameInput.value.length;
+
+		if (length > 0) {
+			getNameSuggestions(nameInput.value);
+		}
+
+		updateSaveInterface()
 	});
 
 	blanket.addEventListener('click', function() {

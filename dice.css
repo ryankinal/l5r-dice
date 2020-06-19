@@ -231,6 +231,22 @@ h1 {
 	margin-top: 30px;
 }
 
+#nameSuggestions,
+#groupSuggestions {
+	margin: 10px 0 0 0;
+	overflow: hidden;
+}
+
+.suggestion {
+	padding: 5px 10px;
+	background-color: #F4D244;
+	color: #000;
+	display: block;
+	float: left;
+	margin-right: 5px;
+	margin-bottom: 5px;
+}
+
 #quickRollsModal {
 	max-height: 70%;
 	overflow: auto;
@@ -254,7 +270,7 @@ h1 {
 	border-bottom: none;
 }
 
-.quick-roll span {
+.quick-roll-buttons span {
 	margin-left: 6px;
 }
 
@@ -287,6 +303,7 @@ h1 {
 .delete-button {
 	color: #DE0808;
 	font-size: 14px;
+	padding: 8px 10px;
 }
 
 .key {
@@ -300,8 +317,18 @@ h1 {
 	text-align: center;
 }
 
+.quick-roll-name,
+.quick-roll-delete {
+	float: left;
+}
+
+.quick-roll-dice {
+	font-size: 0.8em;
+}
+
 .quick-roll-buttons {
 	float: right;
+	margin-top: 7px
 }
 
 #blanket {

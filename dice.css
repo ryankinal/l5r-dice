@@ -84,6 +84,10 @@ h1 {
 	text-align: center;
 }
 
+#rolling {
+	font-size: 32px;
+}
+
 .total {
 	margin-bottom: 10px;
 }
@@ -324,6 +328,16 @@ h1 {
 .quick-roll-buttons {
 	float: right;
 	margin-top: 7px
+}
+
+.clear-roll {
+	margin: 10px 0;
+	text-align: center;
+	color: #DE0808;
+}
+
+.clear-roll span.fas {
+	font-size: 0.8em;
 }
 
 #blanket {

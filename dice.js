@@ -18,6 +18,8 @@
 		rollIdContainer = document.querySelector('.roll-id-container'),
 		rollNameOutput = document.querySelector('.roll-id-container .roll-name'),
 		rollGroupOutput = document.querySelector('.roll-id-container .roll-group'),
+		clearRollContainer = document.querySelector('.clear-roll'),
+		clearRollButton = document.querySelector('.clear-roll span'),
 
 		quickRollsButton = document.getElementById('quickRollsButton'),
 		quickRollsModal = document.getElementById('quickRollsModal'),
@@ -260,11 +262,13 @@
 				rollGroupOutput.innerHTML = '';
 			}
 
-			rollIdContainer.style.display = 'block';
+			rollIdContainer.style.display = 'block'
+			clearRollContainer.style.display = 'inline';
 		} else {
 			rollIdContainer.style.display = 'none';
 			rollNameOutput.innerHTML = '';
 			rollGroupOutput.innerHTML = '';
+			clearRollContainer.style.display = 'none';
 		}
 	}
 
@@ -524,9 +528,9 @@
 				voidRollButton.className = 'fas fa-hand-holding-medical button void-roll-button';
 				deleteButton.className = 'fas fa-trash quick-roll-delete delete-button';
 
+				buttonsContainer.appendChild(deleteButton);
 				buttonsContainer.appendChild(quickRollButton);
 				buttonsContainer.appendChild(voidRollButton);
-				buttonsContainer.appendChild(deleteButton);
 				buttonsContainer.className = 'quick-roll-buttons';
 
 				nameContainer.innerHTML = `${quickRoll.name}<br /><span class="quick-roll-dice">${getRollString(quickRoll)}</span>`;
@@ -720,6 +724,18 @@
 		saveModal.style.display = 'none';
 		blanket.style.display = 'none';
 		quickRollsModal.style.display = 'none';
+	});
+
+	clearRollButton.addEventListener('click', function() {
+		updateRollInterface({
+			name: false,
+			group: false,
+			roll: 1,
+			keep: 1,
+			bonus: 0,
+			explode: true,
+			reroll: false
+		});
 	});
 
 	quickRollsButton.addEventListener('click', showQuickRolls);

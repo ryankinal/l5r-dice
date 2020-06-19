@@ -150,7 +150,7 @@
 				return n.toLowerCase().indexOf(start.toLowerCase()) === 0;
 			});
 
-		if (filtered.length) {
+		if (start.length && filtered.length) {
 			filtered.map(function(n) {
 				var span = document.createElement('span');
 				span.className = 'suggestion';
@@ -179,7 +179,7 @@
 
 		groupSuggestionsOutput.innerHTML = '';
 
-		if (filtered.length) {
+		if (start.length && filtered.length) {
 			filtered.map(function(n) {
 				var span = document.createElement('span');
 				span.className = 'suggestion';
@@ -697,12 +697,8 @@
 	});
 
 	groupInput.addEventListener('keyup', function(e) {
-		var suggestion,
-			length = groupInput.value.length;
-
-		if (length > 0) {
-			getGroupSuggestions(groupInput.value);
-		}
+		getGroupSuggestions(groupInput.value);
+		updateSaveInterface();
 	});
 
 	nameInput.addEventListener('focus', function(e) {
@@ -710,14 +706,8 @@
 	});
 
 	nameInput.addEventListener('keyup', function(e) {
-		var suggestion,
-			length = nameInput.value.length;
-
-		if (length > 0) {
-			getNameSuggestions(nameInput.value);
-		}
-
-		updateSaveInterface()
+		getNameSuggestions(nameInput.value);
+		updateSaveInterface();
 	});
 
 	blanket.addEventListener('click', function() {

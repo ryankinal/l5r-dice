@@ -317,11 +317,6 @@ h1 {
 	text-align: center;
 }
 
-.quick-roll-name,
-.quick-roll-delete {
-	float: left;
-}
-
 .quick-roll-dice {
 	font-size: 0.8em;
 }

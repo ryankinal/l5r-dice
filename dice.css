@@ -54,6 +54,17 @@ h1 {
 	text-align: center;
 }
 
+.options label {
+	padding: 3px 5px;
+	margin: 3px 5px;
+	display: inline-block;
+	width: 45%;
+}
+
+.options .selected {
+	background-color: rgba(238, 235, 216, 0.1);
+}
+
 .error {
 	border: solid #DE0808 2px;
 }
@@ -213,6 +224,12 @@ h1 {
 	background-color: #38332F;
 	z-index: 3;
 	left: 0;
+	max-height: 70%;
+	overflow: auto;
+}
+
+#quickRollsModal {
+	padding: 0;
 }
 
 #saveModal label,
@@ -255,17 +272,16 @@ h1 {
 	margin-bottom: 5px;
 }
 
-#quickRollsModal {
-	max-height: 70%;
-	overflow: auto;
-}
-
 #quickRollsModal h2 {
 	font-size: 22px;
 	background-color: #EEEBD8;
 	color: #38332F;
-	margin: 0 -15px;
 	padding: 10px;
+}
+
+#quickRollsModal h2:first-child {
+	margin-top: 0;
+	margin-bottom: 0;
 }
 
 .quick-roll {
@@ -276,6 +292,10 @@ h1 {
 
 .quick-roll:last-child {
 	border-bottom: none;
+}
+
+.quick-roll.clicked {
+	background-color: rgba(238, 235, 216, 0.1);
 }
 
 .quick-roll-buttons span {

@@ -8,7 +8,9 @@
 		keepInput = document.getElementById('keep'),
 		bonusInput = document.getElementById('bonus'),
 		explodeInput = document.getElementById('explode'),
+		explodeNinesInput = document.getElementById('explodeNines'),
 		rerollInput = document.getElementById('reroll'),
+		voidInput = document.getElementById('void'),
 		outputContainer = document.getElementById('output'),
 		actualRolledOutput = document.querySelector('#output .actual-rolled'),
 		totalOutput = document.querySelector('#output .total'),
@@ -215,7 +217,9 @@
 			keep: parseInt(keepInput.value),
 			bonus: parseInt(bonusInput.value),
 			explode: !!explodeInput.checked,
+			explodeNines: !!explodeNinesInput.checked,
 			reroll: !!rerollInput.checked,
+			void: !!voidInput.checked,
 			name: (rollNameOutput.innerText) ? rollNameOutput.innerText : null,
 			group: (rollGroupOutput.innerText) ? rollGroupOutput.innerText : null
 		};
@@ -241,8 +245,35 @@
 		rollInput.value = rollObject.roll;
 		keepInput.value = rollObject.keep;
 		bonusInput.value = rollObject.bonus;
-		explodeInput.checked = (rollObject.explode) ? 'checked' : false;
+		explodeInput.checked = (rollObject.explode || rollObject.explodeNines) ? 'checked' : false;
+		explodeNinesInput.checked = (rollObject.explodeNines) ? 'checked' : false;
 		rerollInput.checked = (rollObject.reroll) ? 'checked' : false;
+		voidInput.checked = (rollObject.void) ? 'checked' : false;
+
+		if (rollObject.explode) {
+			explodeInput.parentNode.classList.add('selected');
+		} else {
+			explodeInput.parentNode.classList.remove('selected');
+		}
+
+		if (rollObject.explodeNines) {
+			explodeNinesInput.parentNode.classList.add('selected');
+			explodeInput.parentNode.classList.add('selected');
+		} else {
+			explodeNinesInput.parentNode.classList.remove('selected');
+		}
+
+		if (rollObject.reroll) {
+			rerollInput.parentNode.classList.add('selected');
+		} else {
+			rerollInput.parentNode.classList.remove('selected');
+		}
+
+		if (rollObject.void) {
+			voidInput.parentNode.classList.add('selected');
+		} else {
+			voidInput.parentNode.classList.remove('selected');
+		}
 
 		if (rollObject.name || rollObject.group) {
 			if (rollObject.name) {
@@ -277,21 +308,24 @@
 		return Math.floor(Math.random() * 10) + 1;
 	}
 
-	function doExplode(val) {
-		if (val === 10) {
-			return val + doExplode(d10());
+	function doExplode(val, nines) {
+		var nines = nines || false,
+			lastRoll = val[val.length - 1];
+
+		if (lastRoll === 10 || (nines && lastRoll === 9)) {
+			return [].concat(val).concat(doExplode([d10()], nines));
 		} else {
 			return val;
 		}
 	}
 
 	function checkReroll(val) {
-		return val === 1;
+		return val[0] === 1;
 	}
 
 	function doReroll(val) {
-		if (val === 1) {
-			return d10();
+		if (val[0] === 1) {
+			return [d10()];
 		} else {
 			return val;
 		}
@@ -302,27 +336,13 @@
 	}
 
 	function makeDie(val) {
-		var split = splitDie(val),
-			out = split.map(function(val) {
-				return `<span class="output-die"><span class="output-die-value">${val % 10}</span></span>`;
+		var out = val.map(function(v) {
+				return `<span class="output-die"><span class="output-die-value">${v % 10}</span></span>`;
 			}).join('<span class="output-text">+</span>');
 
-			out += `<span class="output-total-die-value">${val}</span>`;
+			out += `<span class="output-total-die-value">${val.reduce(sum, 0)}</span>`;
 
 		return out;
-	}
-
-	function splitDie(val) {
-		var split = [];
-
-		while (val > 10) {
-			split.push(10);
-			val -= 10;
-		}
-
-		split.push(val);
-
-		return split;
 	}
 
 	function updateSaveInterface() {
@@ -347,6 +367,8 @@
 				bonus = config.bonus,
 				explode = config.explode,
 				reroll = config.reroll,
+				nines = config.explodeNines,
+				useVoid = config.void,
 				spread = [],
 				rerolled = [],
 				keep = [],
@@ -354,6 +376,11 @@
 				total = 0,
 				totalString = '',
 				bonusString;
+
+			if (useVoid) {
+				toRoll++;
+				toKeep++;
+			}
 
 			// Can't roll more than 10 dice in l54 4E
 			// Every 2 on top of that is +1 kept die
@@ -365,7 +392,9 @@
 			// Create an array with the right number of items,
 			// fill it with anything so map works, and then
 			// roll a d10 for each item
-			spread = (new Array(toRoll)).fill(0).map(d10);
+			spread = (new Array(toRoll)).fill(0).map(d10).map(function(v) {
+				return [v];
+			});
 
 			// If we're rerolling 1's for emphases, do that
 			// first. We track which initial rolls were 1's
@@ -380,19 +409,26 @@
 			// a non-10 is rolled. Theoretically, this could
 			// go infinite in very rare circumstances.
 			if (explode) {
-				spread = spread.map(doExplode);
+				spread = spread.map(function(v) {
+					return doExplode(v, nines);
+				});
 			}
 
 			// Sort the array numerically. JS sorts alphabetically
 			// by default even when the array is all numemric. Oh well.
 			spread = spread.sort(function(a, b) {
-				return b - a;
+				var sumA = a.reduce(sum, 0),
+					sumB = b.reduce(sum, 0);
+
+				return sumB - sumA;
 			});
 
 			// Get the kept dice, the total rolled on those dice
 			// and the total after bonuses
 			keep = spread.slice(0, toKeep);
-			rolled = keep.reduce(sum, 0);
+			rolled = keep.map(function(v) {
+				return v.reduce(sum, 0);
+			}).reduce(sum, 0);
 			total = rolled + bonus;
 
 			actualRolledOutput.innerHTML = `Rolled <span class="actual-rolled">${toRoll}</span>, kept <span class="actual-kept">${toKeep}</span>`;
@@ -424,8 +460,7 @@
 					</div>
 					<div class="output-section output-section-equals">
 						<div>=</div>
-					</div>
-					` + totalString;
+					</div>` + totalString;
 
 				totalOutput.classList.add('bonus');
 			} else {
@@ -440,12 +475,12 @@
 					rerollClass = (rerolled[index]) ? 'rerolled' : '',
 					tags = [];
 
-				if (val >= 10) {
-					tags.push('exploded');
-				}
-
 				if (rerolled[index]) {
 					tags.push('rerolled');
+				}
+
+				if (explode && (val[0] === 10 || (nines && val[0] === 9))) {
+					tags.push('exploded');
 				}
 
 				if (index < toKeep) {
@@ -469,7 +504,6 @@
 
 	function makeMinZeroHandler(input) {
 		return function() {
-			console.log('change');
 			if (parseInt(input.value) < 0) {
 				input.value = 0;
 			}
@@ -478,7 +512,6 @@
 
 	function makeMaxRollHandler(input) {
 		return function() {
-			console.log('change');
 			if (parseInt(input.value) > parseInt(rollInput.value)) {
 				input.value = rollInput.value;
 			}
@@ -519,19 +552,13 @@
 				var container = document.createElement('div'),
 					nameContainer = document.createElement('div'),
 					buttonsContainer = document.createElement('div')
-					quickRollButton = document.createElement('span'),
-					voidRollButton = document.createElement('span'),
 					deleteButton = document.createElement('span');
 
 				container.className = 'quick-roll';
 				nameContainer.className = 'quick-roll-name';
-				quickRollButton.className = 'fas fa-hand-holding button quick-roll-button';
-				voidRollButton.className = 'fas fa-hand-holding-medical button void-roll-button';
 				deleteButton.className = 'fas fa-trash quick-roll-delete delete-button';
 
 				buttonsContainer.appendChild(deleteButton);
-				buttonsContainer.appendChild(quickRollButton);
-				buttonsContainer.appendChild(voidRollButton);
 				buttonsContainer.className = 'quick-roll-buttons';
 
 				nameContainer.innerHTML = `${quickRoll.name}<br /><span class="quick-roll-dice">${getRollString(quickRoll)}</span>`;
@@ -541,24 +568,18 @@
 
 				groupContainer.appendChild(container);
 
-				quickRollButton.addEventListener('click', function() {
-					blanket.style.display = 'none';
-					quickRollsModal.style.display = 'none';
+				container.addEventListener('click', function() {
+					container.classList.add('clicked');
 
-					updateRollInterface(quickRoll);
+					setTimeout(function() {
+						blanket.style.display = 'none';
+						quickRollsModal.style.display = 'none';
+
+						updateRollInterface(quickRoll);	
+					}, 100);
 				});
 
-				voidRollButton.addEventListener('click', function() {
-					var voidRoll = Object.assign({}, quickRoll);
-					voidRoll.roll += 1;
-					voidRoll.keep += 1;
-					blanket.style.display = 'none';
-					quickRollsModal.style.display = 'none';
-
-					updateRollInterface(voidRoll);
-				});
-
-				deleteButton.addEventListener('click', function() {
+				deleteButton.addEventListener('click', function(e) {
 					quickRolls = quickRolls.filter(function(filterRoll) {
 						return filterRoll.name !== quickRoll.name || filterRoll.group !== quickRoll.group;
 					});
@@ -582,6 +603,8 @@
 					if (quickRolls.length === 0) {
 						quickRollsButton.style.display = 'none';
 					}
+
+					e.stopPropagation();
 				});
 			});
 
@@ -594,14 +617,21 @@
 
 	function showSaveModal() {
 		var rollString = getRollString(rollToSave),
-			bonusStrings = [];
+			bonusStrings = [],
+			explodeString = '';
 
-		if (rollToSave.explode) {
-			bonusStrings.push('Explode 10s');
+		if (rollToSave.explode || rollToSave.explodeNines) {
+			if (rollToSave.explodeNines) {
+				bonusStrings.push('Explode 9s');
+			}
+
+			if (rollToSave.explode) {
+				bonusStrings.push('Explode 10s');
+			}
 		} else {
-			bonusStrings.push('Do not explode 10s');
+			bonusStrings.push('Do not explode');
 		}
-
+		
 		if (rollToSave.reroll) {
 			bonusStrings.push('Reroll 1s')
 		} else {
@@ -737,8 +767,29 @@
 			keep: 1,
 			bonus: 0,
 			explode: true,
-			reroll: false
+			reroll: false,
+			void: false
 		});
+	});
+
+	explodeInput.addEventListener('change', function() {
+		if (!explodeInput.checked) {
+			explodeNinesInput.checked = false;
+		}
+
+		updateRollInterface(getRollObject())
+	});
+
+	explodeNinesInput.addEventListener('change', function() {
+		updateRollInterface(getRollObject())
+	});
+
+	rerollInput.addEventListener('change', function() {
+		updateRollInterface(getRollObject())
+	});
+
+	voidInput.addEventListener('change', function() {
+		updateRollInterface(getRollObject());
 	});
 
 	quickRollsButton.addEventListener('click', showQuickRolls);

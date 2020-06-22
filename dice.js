@@ -73,7 +73,7 @@
 			'Perform: Samisen',
 			'Perform: Song',
 			'Perform: Storytelling',
-			'Sinceriy',
+			'Sincerity',
 			'Spellcraft',
 			'Tea Ceremony',
 			'Athletics',

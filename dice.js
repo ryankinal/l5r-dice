@@ -20,6 +20,7 @@
 		rollIdContainer = document.querySelector('.roll-id-container'),
 		rollNameOutput = document.querySelector('.roll-id-container .roll-name'),
 		rollGroupOutput = document.querySelector('.roll-id-container .roll-group'),
+		rollAverageOutput = document.querySelector('.roll-average-container .average'),
 		clearRollContainer = document.querySelector('.clear-roll'),
 		clearRollButton = document.querySelector('.clear-roll span'),
 
@@ -35,110 +36,7 @@
 		nameSuggestionsOutput = document.getElementById('nameSuggestions'),
 		groupInput = document.getElementById('groupInput'),
 		groupSuggestionsOutput = document.getElementById('groupSuggestions'),
-		blanket = document.getElementById('blanket'),
-
-		skills = [
-			'Acting',
-			'Artisan',
-			'Calligraphy',
-			'Courtier',
-			'Divination',
-			'Etiquette',
-			'Games',
-			'Investigation',
-			'Lore: Anatomy',
-			'Lore: Architecture',
-			'Lore: Bushido',
-			'Lore: Elements',
-			'Lore: Ghosts',
-			'Lore: Heraldry',
-			'Lore: History',
-			'Lore: Maho',
-			'Lore: Nature',
-			'Lore: Omens',
-			'Lore: Shadowlands',
-			'Lore: Shugenja',
-			'Lore: Spirit Realms',
-			'Lore: Theology',
-			'Lore: Underworld',
-			'Lore: War',
-			'Medicine',
-			'Meditation',
-			'Perform: Biwa',
-			'Perform: Dance',
-			'Perform: Drums',
-			'Perform: Flute',
-			'Perform: Oratory',
-			'Perform: Puppeteer',
-			'Perform: Samisen',
-			'Perform: Song',
-			'Perform: Storytelling',
-			'Sincerity',
-			'Spellcraft',
-			'Tea Ceremony',
-			'Athletics',
-			'Battle',
-			'Defense',
-			'Horsemanship',
-			'Hunting',
-			'Iaijutsu',
-			'Jiujutsu',
-			'Chain Weapons',
-			'Heavy Weapons',
-			'Kenjutsu',
-			'Knives',
-			'Kyujutsu',
-			'Ninjutsu',
-			'Polearms',
-			'Spears',
-			'Staves',
-			'War Fan',
-			'Animal Handling',
-			'Commerce',
-			'Craft: Armorsmithing',
-			'Craft: Blacksmithing',
-			'Craft: Bowyer',
-			'Craft: Brewing',
-			'Craft: Carpentry',
-			'Craft: Cartography',
-			'Craft: Cobbling',
-			'Craft: Cooking',
-			'Craft: Farming',
-			'Craft: Fishing',
-			'Craft: Masonry',
-			'Craft: Mining',
-			'Craft: Poison',
-			'Craft: Pottery',
-			'Craft: Shipbuilding',
-			'Craft: Tailoring',
-			'Craft: Weaponsmithing',
-			'Craft: Weaving',
-			'Engineering',
-			'Sailing',
-			'Forgery',
-			'Intimidation',
-			'Sleight of Hand',
-			'Stealth',
-			'Temptation',
-			'Initiative',
-			'Honor',
-			'Glory',
-			'Earth',
-			'Status',
-			'Rank',
-			'Stamina',
-			'Willpower',
-			'Water',
-			'Strength',
-			'Perception',
-			'Air',
-			'Reflexes',
-			'Awareness',
-			'Fire',
-			'Agility',
-			'Intelligence',
-			'Void'
-		];
+		blanket = document.getElementById('blanket');
 
 	function clearResults() {
 		actualRolledOutput.innerHTML = '';
@@ -257,8 +155,59 @@
 		return str;
 	}
 
-	function updateRollInterface(rollObject) {
-		clearResults();
+	function getAverage(rollObject) {
+		var roll = rollObject.roll,
+			keep = rollObject.keep,
+			str,
+			average = 0;
+
+		if (rollObject.void) {
+			roll++;
+			keep++;
+		}
+
+		if (roll > 10) {
+			keep += Math.floor(roll / 2);
+			roll = 10;
+		}
+
+		if (keep > 10) {
+			keep = 10;
+		}
+
+		str = roll + 'k' + keep;
+
+		if (rollObject.reroll) {
+			str += 'e';
+
+			if (rollObject.explodeNines) {
+				str += '_e9';
+			} else if (!rollObject.explode) {
+				str += '_ne';
+			}
+		} else {
+			if (rollObject.explodeNines) {
+				str += '_e9';
+			} else if (!rollObject.explode) {
+				str += 'ne';
+			}
+		}
+
+		if (averages[str]) {
+			return averages[str] + rollObject.bonus;
+		} else {
+			return null;
+		}
+	}
+
+	function updateRollInterface(rollObject, clear) {
+		if (clear || typeof clear === 'undefined') {
+			clearResults();	
+		}
+
+		if (!rollObject) {
+			rollObject = getRollObject();
+		}
 
 		rollInput.value = rollObject.roll;
 		keepInput.value = rollObject.keep;
@@ -267,6 +216,7 @@
 		explodeNinesInput.checked = (rollObject.explodeNines) ? 'checked' : false;
 		rerollInput.checked = (rollObject.reroll) ? 'checked' : false;
 		voidInput.checked = (rollObject.void) ? 'checked' : false;
+		rollAverageOutput.innerHTML = getAverage(rollObject);
 
 		if (rollObject.explode) {
 			explodeInput.parentNode.classList.add('selected');
@@ -405,6 +355,10 @@
 			if (toRoll > 10) {
 				toKeep += Math.floor((toRoll - 10) / 2);
 				toRoll = 10;
+			}
+
+			if (toKeep > 10) {
+				toKeep = 10;
 			}
 
 			// Create an array with the right number of items,
@@ -689,6 +643,18 @@
 	rollInput.addEventListener('change', makeMaxRollHandler(keepInput));
 	keepInput.addEventListener('change', makeMaxRollHandler(keepInput));
 
+	rollInput.addEventListener('change', function () {
+		updateRollInterface(getRollObject(), false);
+	});
+
+	keepInput.addEventListener('change', function() {
+		updateRollInterface(getRollObject(), false);
+	});
+
+	bonusInput.addEventListener('change', function() {
+		updateRollInterface(getRollObject(), false);
+	});
+
 	rollButton.addEventListener('click', function() {
 		roll(getRollObject());
 	});
@@ -795,19 +761,19 @@
 			explodeNinesInput.checked = false;
 		}
 
-		updateRollInterface(getRollObject())
+		updateRollInterface(getRollObject(), false)
 	});
 
 	explodeNinesInput.addEventListener('change', function() {
-		updateRollInterface(getRollObject())
+		updateRollInterface(getRollObject(), false)
 	});
 
 	rerollInput.addEventListener('change', function() {
-		updateRollInterface(getRollObject())
+		updateRollInterface(getRollObject(), false)
 	});
 
 	voidInput.addEventListener('change', function() {
-		updateRollInterface(getRollObject());
+		updateRollInterface(getRollObject(), false);
 	});
 
 	quickRollsButton.addEventListener('click', showQuickRolls);

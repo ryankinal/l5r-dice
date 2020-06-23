@@ -20,9 +20,14 @@ h1 {
 	margin: 0 auto;
 }
 
-.roll-id-container {
+.roll-id-container,
+.roll-average-container {
 	margin-bottom: 15px;
 	text-align: center;
+}
+
+.roll-average-container {
+	font-size: 0.8em;
 }
 
 .form {

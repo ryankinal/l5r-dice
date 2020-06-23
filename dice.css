@@ -28,6 +28,7 @@ h1 {
 
 .roll-average-container {
 	font-size: 0.8em;
+	display: none;
 }
 
 .form {

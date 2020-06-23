@@ -133,7 +133,7 @@
 			'Perception',
 			'Air',
 			'Reflexes',
-			'Awareness'
+			'Awareness',
 			'Fire',
 			'Agility',
 			'Intelligence',

@@ -119,7 +119,25 @@
 			'Intimidation',
 			'Sleight of Hand',
 			'Stealth',
-			'Temptation'
+			'Temptation',
+			'Initiative',
+			'Honor',
+			'Glory',
+			'Earth',
+			'Status',
+			'Rank',
+			'Stamina',
+			'Willpower',
+			'Water',
+			'Strength',
+			'Perception',
+			'Air',
+			'Reflexes',
+			'Awareness'
+			'Fire',
+			'Agility',
+			'Intelligence',
+			'Void'
 		];
 
 	function clearResults() {
